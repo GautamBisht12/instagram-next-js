@@ -16,15 +16,24 @@ import {
 } from "firebase/storage";
 import { app } from "@/firebase";
 
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  serverTimestamp,
+} from "firebase/firestore";
 const Header = () => {
   const { data: session } = useSession();
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [imageFileUploading, setImageFileUploading] = useState(false);
+  const [postUploading, setPostUploading] = useState(false);
+  const [caption, setCaption] = useState("");
 
   const filePickerRef = useRef(null);
-
+  const db = getFirestore(app);
   const addImageToPost = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -67,6 +76,19 @@ const Header = () => {
         });
       }
     );
+  };
+  console.log(session);
+  const handleSubmit = async () => {
+    setPostUploading(true);
+    const docRef = await addDoc(collection(db, "posts"), {
+      username: session.user.username,
+      caption,
+      profileImg: session.user.image,
+      image: imageFileUrl,
+      timestamp: serverTimestamp(),
+    });
+    setPostUploading(false);
+    setIsOpen(false);
   };
 
   return (
@@ -156,9 +178,16 @@ const Header = () => {
             maxLength="150"
             placeholder="Please enter your caption ...."
             className="w-full text-center border-none outline-none m-4 focus:ring-0"
+            onChange={(e) => setCaption(e.target.value)}
           />
           <button
-            disabled
+            disabled={
+              !selectedFile ||
+              !caption.trim() === "" ||
+              postUploading ||
+              imageFileUploading
+            }
+            onClick={handleSubmit}
             className="w-full bg-red-600 text-white p-2 shadow-md rounded-lg hover:brightness-105 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:brightness-100"
           >
             Upload Post

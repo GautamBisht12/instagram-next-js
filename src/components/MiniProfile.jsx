@@ -9,7 +9,7 @@ const MiniProfile = () => {
   return (
     <>
       <div>
-        <div className="logo flex items-center justify-around mt-14 scroll-ml-10">
+        <div className="logo flex items-center justify-around mt-14 ml-10 w-full">
           <img
             className="w-16 h-16 border p-[2px] rounded-full"
             src={session?.user?.image || "/instagram_PNG.png"}
